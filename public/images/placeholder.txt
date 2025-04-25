@@ -1,0 +1,3 @@
+
+This directory contains placeholder images for menu items.
+In a real project, these would be actual images.

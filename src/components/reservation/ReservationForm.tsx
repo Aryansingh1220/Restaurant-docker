@@ -35,6 +35,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 
+// Update the schema to ensure guests is properly transformed to a number
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -51,7 +52,8 @@ const formSchema = z.object({
   time: z.string({
     required_error: "Please select a time.",
   }),
-  guests: z.string().transform(val => parseInt(val, 10)),
+  // Ensure this is properly transformed to a number
+  guests: z.coerce.number().int().positive(),
   specialRequests: z.string().optional(),
 });
 
@@ -90,13 +92,13 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ className }) => {
       name: "",
       email: "",
       phone: "",
-      guests: "2",
+      guests: 2, // Changed from "2" to 2 to match number type
       specialRequests: "",
     },
   });
 
   const onSubmit = (data: FormValues) => {
-    // Ensure data.guests is a number before dispatching
+    // No need for explicit conversion since guests is already a number thanks to the schema
     dispatch(
       addReservation({
         name: data.name,
@@ -104,7 +106,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ className }) => {
         phone: data.phone,
         date: format(data.date, 'yyyy-MM-dd'),
         time: data.time,
-        guests: Number(data.guests), // Ensure this is a number
+        guests: data.guests, // This is now correctly typed as a number
         specialRequests: data.specialRequests,
       })
     );

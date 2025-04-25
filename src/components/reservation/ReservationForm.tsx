@@ -96,6 +96,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ className }) => {
   });
 
   const onSubmit = (data: FormValues) => {
+    // Ensure data.guests is a number before dispatching
     dispatch(
       addReservation({
         name: data.name,
@@ -103,7 +104,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ className }) => {
         phone: data.phone,
         date: format(data.date, 'yyyy-MM-dd'),
         time: data.time,
-        guests: data.guests,
+        guests: Number(data.guests), // Ensure this is a number
         specialRequests: data.specialRequests,
       })
     );

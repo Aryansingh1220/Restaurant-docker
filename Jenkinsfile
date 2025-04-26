@@ -1,64 +1,58 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18-alpine'
-            args '-v /var/run/docker.sock:/var/run/docker.sock' // Ensure Docker socket access inside container
-        }
-    }
-    
+    agent any // Use any agent type if Docker isn't available globally
+
     environment {
         HOME = '.'
     }
-    
+
     stages {
         stage('Install Dependencies') {
             steps {
-                bat 'npm install' // Runs npm install in Windows environment
+                bat 'npm install'
             }
         }
-        
+
         stage('Lint') {
             steps {
-                bat 'npm run lint' // Runs linting in Windows environment
+                bat 'npm run lint'
             }
         }
-        
+
         stage('Build') {
             steps {
-                bat 'npm run build' // Builds the project in Windows environment
+                bat 'npm run build'
             }
         }
-        
+
         stage('Test') {
             steps {
-                bat 'npm test' // Runs tests in Windows environment
+                bat 'npm test'
             }
         }
-        
+
         stage('Docker Build') {
             when {
                 branch 'master'
             }
             steps {
                 script {
-                    // Build Docker image on the master branch
+                    // Run docker build command here
                     bat 'docker build -t yumyum-restaurant:latest .' 
                 }
             }
         }
-        
+
         stage('Deploy') {
             when {
                 branch 'master'
             }
             steps {
                 echo 'Deploying to production server...'
-                // In a real environment, you would add deployment steps here
-                // This could involve pushing to a cloud service like AWS, Azure, or DigitalOcean
+                // Deployment steps
             }
         }
     }
-    
+
     post {
         always {
             echo 'Pipeline execution completed'

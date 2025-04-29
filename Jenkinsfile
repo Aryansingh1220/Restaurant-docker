@@ -24,7 +24,7 @@ pipeline {
 
         stage('Lint') {
             steps {
-                bat 'npm run lint'
+                bat 'npm run lint -- --max-warnings 10'
             }
         }
 
@@ -96,32 +96,26 @@ pipeline {
 
     post {
         always {
-            node('master') {
-                cleanWs()
-                bat "docker logout ${DOCKER_REGISTRY}"
-            }
+            cleanWs()
+            bat "docker logout ${DOCKER_REGISTRY}"
         }
         success {
-            node('master') {
-                emailext (
-                    subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build succeeded. Docker image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}",
-                    to: 'team@example.com',
-                    replyTo: 'team@example.com',
-                    mimeType: 'text/html'
-                )
-            }
+            emailext (
+                subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build succeeded. Docker image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}",
+                to: 'team@example.com',
+                replyTo: 'team@example.com',
+                mimeType: 'text/html'
+            )
         }
         failure {
-            node('master') {
-                emailext (
-                    subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build failed. Please check Jenkins logs for details.",
-                    to: 'team@example.com',
-                    replyTo: 'team@example.com',
-                    mimeType: 'text/html'
-                )
-            }
+            emailext (
+                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build failed. Please check Jenkins logs for details.",
+                to: 'team@example.com',
+                replyTo: 'team@example.com',
+                mimeType: 'text/html'
+            )
         }
     }
 }

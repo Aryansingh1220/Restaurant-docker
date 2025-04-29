@@ -6,6 +6,7 @@ pipeline {
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE = 'yumyum-restaurant'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
+        DEPLOY_SERVER = 'your-deployment-server'
     }
 
     stages {
@@ -82,7 +83,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'deploy-server', usernameVariable: 'DEPLOY_USER', passwordVariable: 'DEPLOY_PASSWORD')]) {
                         bat """
                             echo "Deploying to production server..."
-                            sshpass -p %DEPLOY_PASSWORD% ssh %DEPLOY_USER%@${DEPLOY_SERVER} "cd /opt/yumyum && \
+                            plink -ssh %DEPLOY_USER%@${DEPLOY_SERVER} -pw %DEPLOY_PASSWORD% "cd /opt/yumyum && \
                             docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG} && \
                             docker-compose down && \
                             docker-compose up -d"
@@ -95,13 +96,13 @@ pipeline {
 
     post {
         always {
-            node {
+            node('master') {
                 cleanWs()
                 bat "docker logout ${DOCKER_REGISTRY}"
             }
         }
         success {
-            node {
+            node('master') {
                 emailext (
                     subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: "Build succeeded. Docker image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}",
@@ -112,7 +113,7 @@ pipeline {
             }
         }
         failure {
-            node {
+            node('master') {
                 emailext (
                     subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: "Build failed. Please check Jenkins logs for details.",
